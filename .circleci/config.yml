@@ -15,7 +15,7 @@ jobs:
           name: Build and push Docker image to DigitalOcean Container Registry
           command: |
             doctl auth init -t ${DO_TOKEN}
-            #doctl registry login -t ${DO_TOKEN}
+            doctl registry login -t ${DO_TOKEN}
             docker build -t registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1} .
             docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
       - run:
