@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  doctl: digitalocean/cli@0.1.1
-
 jobs:
   build:
     machine:
@@ -15,13 +12,11 @@ jobs:
           name: Set up environment
           command: |
             source .circleci/pre_build.sh && get_env_vars
-      - doctl/install
-      - doctl/initialize:
-          digitalocean-access-token: ${API_TOKEN}
+            source .circleci/pre_build.sh && set_up_pre_build
       - run:
           name: Push Docker image to DigitalOcean Container Registry
           command: |
-            doctl registry login --
+            doctl registry login -t ${API_TOKEN}
             docker build -t registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1} .
             #docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
   deploy:
