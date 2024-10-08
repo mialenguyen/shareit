@@ -37,11 +37,11 @@ workflows:
     jobs:
       - build-and-deploy:
           context: do_context
-          filters:
-            branches:
-              only:
-                - develop
-                - main
+          # filters:
+          #   branches:
+          #     only:
+          #       - develop
+          #       - main
   
   deploy-on-demand:
     when: <<pipeline.parameters.run_deploy>>
