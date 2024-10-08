@@ -30,8 +30,7 @@ workflows:
   shareit-pipeline:
     jobs:
       - build-and-deploy:
-          context: do_secrets
-
+          context: do_context
 
 
           
