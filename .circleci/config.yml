@@ -21,7 +21,7 @@ jobs:
           name: Push Docker image to DigitalOcean Container Registry
           command: |
             docker build -t registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1} .
-            #docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
+            docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
   deploy:
     machine:
       image: default
