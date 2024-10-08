@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  run_deploy:
+    type: boolean
+    default: false
+
 jobs:
   build-and-deploy:
     machine:
@@ -7,7 +12,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Set up environment
+          name: Retrieve environment variables and set up environment
           command: |
             source .circleci/pre_build.sh && get_env_vars
             source .circleci/pre_build.sh && set_up_environment
@@ -21,16 +26,33 @@ jobs:
       - run:
           name: Deploy with Helm
           command: |
-            doctl kubernetes cluster kubeconfig save test-cluster-1
+            doctl kubernetes cluster kubeconfig save ${cluster}
             helm upgrade --install shareit ./helm-template \
                 --values ./.kubernetes/helm-values-${env}.yaml \
                 --set image.tag=${CIRCLE_SHA1} 
+                --namespace ${namespace}
 
 workflows:
   shareit-pipeline:
     jobs:
       - build-and-deploy:
           context: do_context
+          filters:
+            branches:
+              only:
+                - develop
+                - main
+  
+  deploy-on-demand:
+    when: <<pipeline.parameters.run_deploy>>
+    jobs:
+      - build-and-deploy:
+          context: do_context
+          filters:
+            branches:
+              ignore:
+                - develop 
+                - main
 
 
           
