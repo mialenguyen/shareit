@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  build-and-deploy:
     machine:
       image: default
     steps:
@@ -12,19 +12,16 @@ jobs:
             source .circleci/pre_build.sh && get_env_vars
             source .circleci/pre_build.sh && set_up_pre_build
       - run:
-          name: Push Docker image to DigitalOcean Container Registry
+          name: Build and push Docker image to DigitalOcean Container Registry
           command: |
             doctl auth init -t ${DO_TOKEN}
-            doctl registry login -t ${DO_TOKEN}
+            #doctl registry login -t ${DO_TOKEN}
             docker build -t registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1} .
-            #docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
-  deploy:
-    machine:
-      image: default
-    steps:
+            docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
       - run:
           name: Deploy with Helm
           command: |
+            doctl kubernetes cluster kubeconfig save cluster-1
             helm upgrade --install shareit ./helm-template \
                 --values ./.kubernetes/helm-values-${env}.yaml \
                 --set image.tag=${CIRCLE_SHA1} 
@@ -32,11 +29,9 @@ jobs:
 workflows:
   shareit-pipeline:
     jobs:
-      - build:
-          context: docker_secrets
-      # - deploy:
-      #     requires:
-      #       - build
+      - build-and-deploy:
+          context: do_secrets
+
 
 
           

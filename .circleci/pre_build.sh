@@ -8,7 +8,7 @@ function get_env_vars() {
   fi
 }
 
-function set_up_pre_build() {
+function set_up_enviroment() {
   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   cd ~
   wget https://github.com/digitalocean/doctl/releases/download/v1.110.0/doctl-1.110.0-linux-amd64.tar.gz
