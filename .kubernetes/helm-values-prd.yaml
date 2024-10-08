@@ -1,0 +1,5 @@
+image:
+  repository: registry.digitalocean.com/clockwork-registry/shareit
+
+ingress:
+  host: shareit.do-interview.cw.substance3d.io

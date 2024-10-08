@@ -1,0 +1,43 @@
+version: 2.1
+
+executors:
+  docker-executor:
+    docker:
+      - image: cimg/go:1.23
+    working_directory: ~/app
+
+jobs:
+  build-and-deploy:
+    executor: docker-executor
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.7
+      - run:
+          name: Get environment variables
+          command: |
+            source .circleci/get_env_vars.sh && get_env_vars
+      - run:
+          name: Install Helm
+          command: |
+            curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - run:
+          name: Docker login to DigitalOcean registry
+          command: |
+            echo $DOCKER_PASSWORD | docker login registry.digitalocean.com -u $DOCKER_USERNAME --password-stdin
+      - run:
+          name: Push Docker image to DigitalOcean Container Registry
+          command: |
+            docker build -t registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1} .
+            docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
+      - run:
+          name: Deploy with Helm
+          command: |
+            helm upgrade --install shareit ./helm-template \
+                --values ./.kubernetes/helm-values-${env}.yaml \
+                --set image.tag=${CIRCLE_SHA1} 
+
+workflows:
+  shareit-pipeline:
+    jobs:
+      - build-and-deploy
