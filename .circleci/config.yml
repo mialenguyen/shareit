@@ -1,35 +1,31 @@
 version: 2.1
 
-executors:
-  docker-executor:
-    docker:
-      - image: cimg/go:1.23
-    working_directory: ~/app
+orbs:
+  doctl: digitalocean/cli@0.1.1
 
 jobs:
-  build-and-deploy:
-    executor: docker-executor
+  build:
+    machine:
+      image: default
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.7
+          docker_layer_caching: true
       - run:
-          name: Get environment variables
+          name: Set up environment
           command: |
-            source .circleci/get_env_vars.sh && get_env_vars
-      - run:
-          name: Install Helm
-          command: |
-            curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-      - run:
-          name: Docker login to DigitalOcean registry
-          command: |
-            echo $DOCKER_PASSWORD | docker login registry.digitalocean.com -u $DOCKER_USERNAME --password-stdin
+            source .circleci/pre_build.sh && get_env_vars
+      - doctl/install_and_initialize_cli:
+          digitalocean-access-token: ${API_TOKEN}
       - run:
           name: Push Docker image to DigitalOcean Container Registry
           command: |
             docker build -t registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1} .
-            docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
+            #docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
+  deploy:
+    machine:
+      image: default
+    steps:
       - run:
           name: Deploy with Helm
           command: |
@@ -40,4 +36,11 @@ jobs:
 workflows:
   shareit-pipeline:
     jobs:
-      - build-and-deploy
+      - build:
+          context: docker_secrets
+      # - deploy:
+      #     requires:
+      #       - build
+
+
+          
