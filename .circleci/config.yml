@@ -10,7 +10,7 @@ jobs:
           name: Set up environment
           command: |
             source .circleci/pre_build.sh && get_env_vars
-            source .circleci/pre_build.sh && set_up_pre_build
+            source .circleci/pre_build.sh && set_up_environment
       - run:
           name: Build and push Docker image to DigitalOcean Container Registry
           command: |
