@@ -21,7 +21,7 @@ jobs:
       - run:
           name: Deploy with Helm
           command: |
-            doctl kubernetes cluster kubeconfig save cluster-1
+            doctl kubernetes cluster kubeconfig save test-cluster-1
             helm upgrade --install shareit ./helm-template \
                 --values ./.kubernetes/helm-values-${env}.yaml \
                 --set image.tag=${CIRCLE_SHA1} 
