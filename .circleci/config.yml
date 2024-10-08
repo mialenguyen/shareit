@@ -29,8 +29,8 @@ jobs:
             doctl kubernetes cluster kubeconfig save ${cluster}
             helm upgrade --install shareit ./helm-template \
                 --values ./.kubernetes/helm-values-${env}.yaml \
-                --set image.tag=${CIRCLE_SHA1} 
-                --namespace clockwork
+                --set image.tag=${CIRCLE_SHA1} \
+                --namespace ${namespace}
 
 workflows:
   shareit-pipeline:
