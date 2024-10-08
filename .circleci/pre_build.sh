@@ -2,7 +2,7 @@
 
 function get_env_vars() {
   # Environment variables for prod and staging
-  if [[ $CIRCLE_BRANCH == "main" || $CIRCLE_BRANCH == "feature/init-CD" ]]; then
+  if [[ $CIRCLE_BRANCH == "main" ]]; then
     echo 'export env="prd"' >> $BASH_ENV
     echo 'export cluster="test-cluster-1"' >> $BASH_ENV
     echo 'export namespace="clockwork"' >> $BASH_ENV
