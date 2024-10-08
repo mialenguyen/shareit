@@ -1,0 +1,58 @@
+version: 2.1
+
+parameters:
+  run_deploy:
+    type: boolean
+    default: false
+
+jobs:
+  build-and-deploy:
+    machine:
+      image: default
+    steps:
+      - checkout
+      - run:
+          name: Retrieve environment variables and set up environment
+          command: |
+            source .circleci/pre_build.sh && get_env_vars
+            source .circleci/pre_build.sh && set_up_environment
+      - run:
+          name: Build and push Docker image to DigitalOcean Container Registry
+          command: |
+            doctl auth init -t ${DO_TOKEN}
+            doctl registry login -t ${DO_TOKEN}
+            docker build -t registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1} .
+            docker push registry.digitalocean.com/clockwork-registry/shareit:${CIRCLE_SHA1}
+      - run:
+          name: Deploy with Helm
+          command: |
+            doctl kubernetes cluster kubeconfig save ${cluster}
+            helm upgrade --install shareit ./helm-template \
+                --values ./.kubernetes/helm-values-${env}.yaml \
+                --set image.tag=${CIRCLE_SHA1} \
+                --namespace ${namespace}
+
+workflows:
+  shareit-pipeline:
+    jobs:
+      - build-and-deploy:
+          context: do_context
+          # filters:
+          #   branches:
+          #     only:
+          #       - develop
+          #       - main
+  
+  deploy-on-demand:
+    when: <<pipeline.parameters.run_deploy>>
+    jobs:
+      - build-and-deploy:
+          context: do_context
+          filters:
+            branches:
+              ignore:
+                - develop 
+                - main
+
+
+          

@@ -30,3 +30,14 @@ go run ./cmd
 ## About the `/healthz` endpoint
 
 An health check endpoint is available at `/healthz`. It is advised to use it as it checks the availability of the underlying storage. A status code of 200 OK means everything is fine.
+
+## 📦 Folder Structure
+
+```bash
+.
+├── .circleci/           # Contains CI/CD configuration
+├── app/                 # Go application files
+├── .kubernetes/          # Kubernetes configurations
+├── helm-template/          # Helm template for k8s deployment, can be reused for other apps
+└── README.md            # You're here! 😄
+```

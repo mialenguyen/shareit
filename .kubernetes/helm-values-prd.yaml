@@ -1,0 +1,15 @@
+image:
+  repository: registry.digitalocean.com/clockwork-registry/shareit
+
+ingress:
+  host: shareit.do-interview.cw.substance3d.io
+
+livenessProbe:
+  path: "/healthz"
+  initialDelaySeconds: 10
+  periodSeconds: 15
+
+readinessProbe:
+  path: "/healthz"
+  initialDelaySeconds: 5
+  periodSeconds: 10
